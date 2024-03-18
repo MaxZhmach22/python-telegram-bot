@@ -1,3 +1,6 @@
+# Определяем базовый образ для контейнера с поддержкой CUDA
+FROM nvidia/cuda:12.3.2-base-ubuntu20.04
+
 # Используем официальный базовый образ Python
 FROM python:3.9
 
@@ -6,9 +9,6 @@ WORKDIR /app
 
 # Копируем файлы проекта в контейнер
 COPY . /app
-
-# Обновляем pip и устанавливаем необходимые пакеты
-RUN pip install --upgrade pip setuptools wheel
 
 # Устанавливаем зависимости проекта
 RUN pip install --no-cache-dir -r requirements.txt
