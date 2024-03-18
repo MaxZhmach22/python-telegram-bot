@@ -5,6 +5,7 @@ import os
 
 token = ''
 
+
 with open('Token/token.txt', 'r') as file:
     token = file.read().strip()
     file.close()
@@ -41,17 +42,18 @@ def send_photo(message):
     if response.status_code == 200:
         with open(download_path, 'wb') as photo:
             photo.write(response.content)
-        bot.send_message(message.chat.id, f'{text_recognition(download_path)}', reply_to_message_id=message.message_id)
+        text_recognition(download_path)
+        bot.send_document(message.chat.id, open('result.txt', 'rb'),reply_to_message_id=message.message_id);
     else:
         bot.reply_to(message, "Ошибка при сохранении фотографии.")
 
 def text_recognition(img):
-    reader = easyocr.Reader(['ru', 'en'], gpu=False)
-    result = reader.readtext(img)
+    reader = easyocr.Reader(['ru', 'en'], gpu=True)
+    result = reader.readtext(img, paragraph=True, detail=0)
 
     with open('result.txt', 'w') as file:
         for line in result:
-            file.write(f'{line[1]}\n')
+            file.write(f'{line}\n\n')
         file.close()
 
     return f"Результат распознавания: {result}"
