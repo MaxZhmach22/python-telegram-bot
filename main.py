@@ -46,7 +46,7 @@ def send_photo(message):
         bot.reply_to(message, "Ошибка при сохранении фотографии.")
 
 def text_recognition(img):
-    reader = easyocr.Reader(['ru'], gpu=False, verbose=False)
+    reader = easyocr.Reader(['ru', 'en'], gpu=False, verbose=False)
     result = reader.readtext(img)
 
     with open('result.txt', 'w') as file:
