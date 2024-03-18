@@ -1,4 +1,9 @@
 import telebot
+import easyocr
+import requests
+import os
+
+token = ''
 
 with open('Token/token.txt', 'r') as file:
     token = file.read().strip()
@@ -23,7 +28,32 @@ def send_text(message):
 
 @bot.message_handler(content_types=['photo'])
 def send_photo(message):
-    bot.send_message(message.chat.id, 'Крутая фотка')
+    file_id = message.photo[-1].file_id
+    file_info = bot.get_file(file_id)
+    download_url = f'https://api.telegram.org/file/bot{token}/{file_info.file_path}'
 
+    download_dir = 'downloaded_photos'
+    if not os.path.exists(download_dir):
+        os.makedirs(download_dir)
+    download_path = os.path.join(download_dir, f'{file_id}.jpg')
+    response = requests.get(download_url)
+
+    if response.status_code == 200:
+        with open(download_path, 'wb') as photo:
+            photo.write(response.content)
+        bot.send_message(message.chat.id, f'{text_recognition(download_path)}', reply_to_message_id=message.message_id)
+    else:
+        bot.reply_to(message, "Ошибка при сохранении фотографии.")
+
+def text_recognition(img):
+    reader = easyocr.Reader(['ru'], gpu=False, verbose=False)
+    result = reader.readtext(img)
+
+    with open('result.txt', 'w') as file:
+        for line in result:
+            file.write(f'{line[1]}\n')
+        file.close()
+
+    return f"Результат распознавания: {result}"
 
 bot.polling(none_stop=True)
